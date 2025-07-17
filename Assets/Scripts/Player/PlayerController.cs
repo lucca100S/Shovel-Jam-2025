@@ -4,14 +4,15 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement Parameters")]
-    public AnimationCurve accelerationCurve;
-    public AnimationCurve decelerationCurve;
-    public float turnSpeed;
-    public float maxSpeed;
+    [SerializeField] AnimationCurve accelerationCurve;
+    [SerializeField] AnimationCurve decelerationCurve;
+    [SerializeField] float turnSpeed = 70;
+    [SerializeField] float maxSpeed = 20;
 
     [Header("Jump Parameters")]
-    public float jumpHeight;
-    public float jumpSpeed;
+    [SerializeField] float jumpHeight = 2;
+    [SerializeField] float jumpTotalDuration = 1;
+    [SerializeField] float landingGravityIncreaseMultiplier = 1;
 
     [Header("Input Map")]
     [SerializeField] InputActionAsset inputActions;
@@ -20,10 +21,14 @@ public class PlayerController : MonoBehaviour
 
     Rigidbody rb;
     float moveInput;
-    Vector3 currentVelocity = Vector3.zero;
+    Vector3 currentVelocity;
     float desiredVelocity;
     float accelerationTimer;
     float decelerationTimer;
+
+    bool increasedGravityApplied = false;
+    float changeJumpGravityThreshold = -0.01f;
+    float gravityMultiplier = 1;
 
     private void OnEnable()
     {
@@ -44,15 +49,23 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         accelerationTimer = accelerationCurve[0].time; // Set timer to the beginning of the curve
         decelerationTimer = decelerationCurve[decelerationCurve.length - 1].time; // Set timer to the end of the curve
+
+        jumpAction.performed += Jump;
     }
 
     private void FixedUpdate()
     {
+        currentVelocity = rb.linearVelocity;
+
         Move();
 
-        if (jumpAction.WasPressedThisFrame())
+        if (rb.linearVelocity.y < changeJumpGravityThreshold && !increasedGravityApplied)
         {
-            Jump();
+            Debug.Log("Mudou");
+            gravityMultiplier = landingGravityIncreaseMultiplier;
+            increasedGravityApplied = true;
+            UpdateGravity();
+            gravityMultiplier = 1; // Restarts gravityMultiplier for next jump
         }
     }
 
@@ -87,11 +100,31 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = currentVelocity;
     }
 
-    void Jump()
-    {
-        // Alterar calculo de movimento
-        Vector3 jumpPos = transform.position + new Vector3(0, jumpHeight, 0);
-        transform.position = Vector3.Lerp(transform.position, jumpPos, jumpSpeed*Time.deltaTime);
+    void Jump(InputAction.CallbackContext context)
+    { 
+        UpdateGravity();
+        float initialVerticalVelocity = GetInitialVerticalVelocity();
+
+        increasedGravityApplied = false;
+        currentVelocity.y = initialVerticalVelocity;
+        rb.linearVelocity = currentVelocity;
     }
     #endregion
+
+    void UpdateGravity()
+    {
+        float jumpHalfDuration = jumpTotalDuration / 2;
+
+        float gravity = -2 * jumpHeight / Mathf.Pow(jumpHalfDuration, 2) * gravityMultiplier;
+        Physics.gravity = new Vector3(0, gravity, 0);
+        //Debug.Log($"Gravidade: {gravity}");
+    }
+
+    float GetInitialVerticalVelocity()
+    {
+        float jumpHalfDuration = jumpTotalDuration / 2;
+
+        //Debug.Log($"Velocidade inicial: {2 * jumpHeight / jumpHalfDuration}");
+        return 2 * jumpHeight / jumpHalfDuration;
+    }
 }
