@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float jumpHeight = 2;
     [SerializeField] float jumpTotalDuration = 1;
     [SerializeField] float landingGravityIncreaseMultiplier = 1;
+    [SerializeField] float coyoteTime = 0.2f;
     [SerializeField] LayerMask groundLayerMask;
 
     [Header("Input Map")]
@@ -27,12 +28,15 @@ public class PlayerController : MonoBehaviour
     float accelerationTimer;
     float decelerationTimer;
 
-    bool onGround = true;
+    bool onGround;
     float groundRaycastLength = 1.1f;
     bool increasedGravityApplied = false;
     float changeJumpGravityThreshold = -0.01f;
     float gravityMultiplier = 1;
     bool pressingJump = false;
+    bool currentlyJumping = false;
+    float coyoteTimeCounter = 0;
+    float coyoteTimeThreshold = 0.03f;
 
     private void OnEnable()
     {
@@ -61,6 +65,23 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         CheckOnGround();
+
+        if (onGround)
+        {
+            currentlyJumping = false;
+        }
+        
+        if (!currentlyJumping && !onGround)
+        {
+            coyoteTimeCounter += Time.deltaTime;
+        }
+        else
+        {
+            coyoteTimeCounter = 0;
+        }
+        // Debug.Log("Jumping " + currentlyJumping);
+        // Debug.Log("OnGroun " + onGround);
+        Debug.Log(coyoteTimeCounter);
     }
 
     private void FixedUpdate()
@@ -71,7 +92,6 @@ public class PlayerController : MonoBehaviour
 
         if ((rb.linearVelocity.y < changeJumpGravityThreshold || !pressingJump) && !increasedGravityApplied)
         {
-            Debug.Log("Mudou");
             gravityMultiplier = landingGravityIncreaseMultiplier;
             increasedGravityApplied = true;
             UpdateGravity();
@@ -79,7 +99,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    #region Movement
     void Move()
     {
         moveInput = moveAction.ReadValue<float>();
@@ -110,18 +129,23 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = currentVelocity;
     }
 
+    #region Jump
     void Jump(InputAction.CallbackContext context)
     {
         pressingJump = true;
 
-        if (onGround)
+        Debug.Log(onGround);
+        if (onGround || (coyoteTimeCounter > coyoteTimeThreshold && coyoteTimeCounter < coyoteTime))
         {
             UpdateGravity();
             float initialVerticalVelocity = GetInitialVerticalVelocity();
-
-            increasedGravityApplied = false;
+ 
             currentVelocity.y = initialVerticalVelocity;
             rb.linearVelocity = currentVelocity;
+
+            currentlyJumping = true;
+            coyoteTimeCounter = 0;
+            increasedGravityApplied = false;
         }
     }
 

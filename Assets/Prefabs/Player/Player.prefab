@@ -342,6 +342,7 @@ MonoBehaviour:
   jumpHeight: 4
   jumpTotalDuration: 1.5
   landingGravityIncreaseMultiplier: 3
+  coyoteTime: 0.2
   groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
