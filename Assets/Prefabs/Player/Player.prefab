@@ -340,6 +340,9 @@ MonoBehaviour:
   turnSpeed: 70
   maxSpeed: 20
   jumpHeight: 4
-  jumpTotalDuration: 1
-  landingGravityIncreaseMultiplier: 1
+  jumpTotalDuration: 1.5
+  landingGravityIncreaseMultiplier: 3
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
   inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

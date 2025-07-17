@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
     bool increasedGravityApplied = false;
     float changeJumpGravityThreshold = -0.01f;
     float gravityMultiplier = 1;
+    bool pressingJump = false;
 
     private void OnEnable()
     {
@@ -54,12 +55,12 @@ public class PlayerController : MonoBehaviour
         decelerationTimer = decelerationCurve[decelerationCurve.length - 1].time; // Set timer to the end of the curve
 
         jumpAction.performed += Jump;
+        jumpAction.canceled += StoppedPressingJump;
     }
 
     private void Update()
     {
         CheckOnGround();
-        Debug.Log(onGround);
     }
 
     private void FixedUpdate()
@@ -68,7 +69,7 @@ public class PlayerController : MonoBehaviour
 
         Move();
 
-        if (rb.linearVelocity.y < changeJumpGravityThreshold && !increasedGravityApplied)
+        if ((rb.linearVelocity.y < changeJumpGravityThreshold || !pressingJump) && !increasedGravityApplied)
         {
             Debug.Log("Mudou");
             gravityMultiplier = landingGravityIncreaseMultiplier;
@@ -111,6 +112,8 @@ public class PlayerController : MonoBehaviour
 
     void Jump(InputAction.CallbackContext context)
     {
+        pressingJump = true;
+
         if (onGround)
         {
             UpdateGravity();
@@ -142,6 +145,11 @@ public class PlayerController : MonoBehaviour
 
         //Debug.Log($"Velocidade inicial: {2 * jumpHeight / jumpHalfDuration}");
         return 2 * jumpHeight / jumpHalfDuration;
+    }
+
+    void StoppedPressingJump(InputAction.CallbackContext context)
+    {
+        pressingJump = false;
     }
     #endregion
 }
