@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float jumpHeight = 2;
     [SerializeField] float jumpTotalDuration = 1;
     [SerializeField] float landingGravityIncreaseMultiplier = 1;
+    [SerializeField] LayerMask groundLayerMask;
 
     [Header("Input Map")]
     [SerializeField] InputActionAsset inputActions;
@@ -26,6 +27,8 @@ public class PlayerController : MonoBehaviour
     float accelerationTimer;
     float decelerationTimer;
 
+    bool onGround = true;
+    float groundRaycastLength = 1.1f;
     bool increasedGravityApplied = false;
     float changeJumpGravityThreshold = -0.01f;
     float gravityMultiplier = 1;
@@ -51,6 +54,12 @@ public class PlayerController : MonoBehaviour
         decelerationTimer = decelerationCurve[decelerationCurve.length - 1].time; // Set timer to the end of the curve
 
         jumpAction.performed += Jump;
+    }
+
+    private void Update()
+    {
+        CheckOnGround();
+        Debug.Log(onGround);
     }
 
     private void FixedUpdate()
@@ -101,15 +110,22 @@ public class PlayerController : MonoBehaviour
     }
 
     void Jump(InputAction.CallbackContext context)
-    { 
-        UpdateGravity();
-        float initialVerticalVelocity = GetInitialVerticalVelocity();
+    {
+        if (onGround)
+        {
+            UpdateGravity();
+            float initialVerticalVelocity = GetInitialVerticalVelocity();
 
-        increasedGravityApplied = false;
-        currentVelocity.y = initialVerticalVelocity;
-        rb.linearVelocity = currentVelocity;
+            increasedGravityApplied = false;
+            currentVelocity.y = initialVerticalVelocity;
+            rb.linearVelocity = currentVelocity;
+        }
     }
-    #endregion
+
+    void CheckOnGround()
+    {
+        onGround = Physics.Raycast(transform.position, Vector3.down, groundRaycastLength, groundLayerMask);
+    }
 
     void UpdateGravity()
     {
@@ -127,4 +143,5 @@ public class PlayerController : MonoBehaviour
         //Debug.Log($"Velocidade inicial: {2 * jumpHeight / jumpHalfDuration}");
         return 2 * jumpHeight / jumpHalfDuration;
     }
+    #endregion
 }

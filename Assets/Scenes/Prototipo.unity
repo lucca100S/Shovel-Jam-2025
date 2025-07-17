@@ -11038,8 +11038,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5280642562536807839, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
+      propertyPath: groundLayerMask.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 5280642562536807839, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
       propertyPath: landingGravityIncreaseMultiplier
-      value: 3
+      value: 1.75
       objectReference: {fileID: 0}
     - target: {fileID: 8269249422757456028, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
       propertyPath: m_Name
