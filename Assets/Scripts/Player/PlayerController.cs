@@ -22,9 +22,8 @@ public class PlayerController : MonoBehaviour
     float moveInput;
     Vector3 currentVelocity = Vector3.zero;
     float desiredVelocity;
-    float currentAcceleration;
-    float accelerationTimer = 0;
-    float decelerationTimer = 1;
+    float accelerationTimer;
+    float decelerationTimer;
 
     private void OnEnable()
     {
@@ -43,6 +42,8 @@ public class PlayerController : MonoBehaviour
         jumpAction = inputActions.FindAction("Jump");
 
         rb = GetComponent<Rigidbody>();
+        accelerationTimer = accelerationCurve[0].time; // Set timer to the beginning of the curve
+        decelerationTimer = decelerationCurve[decelerationCurve.length - 1].time; // Set timer to the end of the curve
     }
 
     private void FixedUpdate()
@@ -63,7 +64,7 @@ public class PlayerController : MonoBehaviour
 
         if (moveInput != 0)
         {
-            decelerationTimer = 0;
+            decelerationTimer = decelerationCurve[0].time; // Set timer to the beginning of the curve
             if (Mathf.Sign(moveInput) == Mathf.Sign(currentVelocity.x))
             {
                 //currentAcceleration = acceleration * Time.deltaTime;
@@ -72,7 +73,7 @@ public class PlayerController : MonoBehaviour
             else
             {
                 currentVelocity.x = Mathf.MoveTowards(currentVelocity.x, desiredVelocity, turnSpeed * Time.deltaTime);
-                accelerationTimer = 0;
+                accelerationTimer = accelerationCurve[0].time; // Set timer to the beginning of the curve
             }
             accelerationTimer += Time.deltaTime;
         }
@@ -81,7 +82,7 @@ public class PlayerController : MonoBehaviour
             currentVelocity.x = currentVelocity.x * decelerationCurve.Evaluate(decelerationTimer);
 
             decelerationTimer += Time.deltaTime;
-            accelerationTimer = 0;
+            accelerationTimer = accelerationCurve[0].time; // Set timer to the beginning of the curve
         }
         rb.linearVelocity = currentVelocity;
     }
