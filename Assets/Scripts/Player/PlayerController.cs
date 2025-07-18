@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,6 +15,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float jumpTotalDuration = 1;
     [SerializeField] float landingGravityIncreaseMultiplier = 1;
     [SerializeField] float coyoteTime = 0.2f;
+    [SerializeField] float jumpBuffer = 0.2f;
     [SerializeField] LayerMask groundLayerMask;
 
     [Header("Input Map")]
@@ -28,15 +30,17 @@ public class PlayerController : MonoBehaviour
     float accelerationTimer;
     float decelerationTimer;
 
+    PlayerStates state = PlayerStates.OnGround;
+    bool pressingJump = false;
     bool onGround;
     float groundRaycastLength = 1.1f;
+
     bool increasedGravityApplied = false;
     float changeJumpGravityThreshold = -0.01f;
     float gravityMultiplier = 1;
-    bool pressingJump = false;
-    bool currentlyJumping = false;
-    float coyoteTimeCounter = 0;
-    float coyoteTimeThreshold = 0.03f;
+
+    float coyoteTimeCounter;
+    float jumpBufferCounter = 0;
 
     private void OnEnable()
     {
@@ -58,30 +62,21 @@ public class PlayerController : MonoBehaviour
         accelerationTimer = accelerationCurve[0].time; // Set timer to the beginning of the curve
         decelerationTimer = decelerationCurve[decelerationCurve.length - 1].time; // Set timer to the end of the curve
 
-        jumpAction.performed += Jump;
+        jumpAction.performed += StartJumbBufferCounter;
         jumpAction.canceled += StoppedPressingJump;
+
+        coyoteTimeCounter = coyoteTime;
     }
 
     private void Update()
     {
         CheckOnGround();
 
-        if (onGround)
-        {
-            currentlyJumping = false;
-        }
-        
-        if (!currentlyJumping && !onGround)
-        {
-            coyoteTimeCounter += Time.deltaTime;
-        }
-        else
-        {
-            coyoteTimeCounter = 0;
-        }
-        // Debug.Log("Jumping " + currentlyJumping);
-        // Debug.Log("OnGroun " + onGround);
-        Debug.Log(coyoteTimeCounter);
+
+        //Debug.Log(onGround);
+        //Debug.Log(state);
+        //Debug.Log(coyoteTimeCounter);
+        Debug.Log(pressingJump);
     }
 
     private void FixedUpdate()
@@ -90,6 +85,8 @@ public class PlayerController : MonoBehaviour
 
         Move();
 
+        Jump();
+
         if ((rb.linearVelocity.y < changeJumpGravityThreshold || !pressingJump) && !increasedGravityApplied)
         {
             gravityMultiplier = landingGravityIncreaseMultiplier;
@@ -97,6 +94,11 @@ public class PlayerController : MonoBehaviour
             UpdateGravity();
             gravityMultiplier = 1; // Restarts gravityMultiplier for next jump
         }
+    }
+
+    private void LateUpdate()
+    {
+        HandleState();
     }
 
     void Move()
@@ -130,12 +132,9 @@ public class PlayerController : MonoBehaviour
     }
 
     #region Jump
-    void Jump(InputAction.CallbackContext context)
+    void Jump()
     {
-        pressingJump = true;
-
-        Debug.Log(onGround);
-        if (onGround || (coyoteTimeCounter > coyoteTimeThreshold && coyoteTimeCounter < coyoteTime))
+        if (coyoteTimeCounter > 0 && jumpBufferCounter > 0)
         {
             UpdateGravity();
             float initialVerticalVelocity = GetInitialVerticalVelocity();
@@ -143,8 +142,9 @@ public class PlayerController : MonoBehaviour
             currentVelocity.y = initialVerticalVelocity;
             rb.linearVelocity = currentVelocity;
 
-            currentlyJumping = true;
             coyoteTimeCounter = 0;
+            jumpBufferCounter = 0;
+            state = PlayerStates.Jumping;
             increasedGravityApplied = false;
         }
     }
@@ -160,20 +160,69 @@ public class PlayerController : MonoBehaviour
 
         float gravity = -2 * jumpHeight / Mathf.Pow(jumpHalfDuration, 2) * gravityMultiplier;
         Physics.gravity = new Vector3(0, gravity, 0);
-        //Debug.Log($"Gravidade: {gravity}");
     }
 
     float GetInitialVerticalVelocity()
     {
         float jumpHalfDuration = jumpTotalDuration / 2;
 
-        //Debug.Log($"Velocidade inicial: {2 * jumpHeight / jumpHalfDuration}");
         return 2 * jumpHeight / jumpHalfDuration;
     }
 
     void StoppedPressingJump(InputAction.CallbackContext context)
     {
         pressingJump = false;
+    }
+
+    IEnumerator StartCoyoteTimeCounter()
+    {
+        coyoteTimeCounter = coyoteTime;
+
+        while (coyoteTimeCounter > 0)
+        {
+            coyoteTimeCounter -= Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    void StartJumbBufferCounter(InputAction.CallbackContext context)
+    {
+        pressingJump = true;
+
+        StopCoroutine("JumpBufferCounterCoroutine");
+        StartCoroutine(JumpBufferCounterCoroutine());
+    }
+
+    IEnumerator JumpBufferCounterCoroutine()
+    {
+        jumpBufferCounter = jumpBuffer;
+
+        while(jumpBufferCounter > 0)
+        {
+            jumpBufferCounter -= Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    void HandleState()
+    {
+        if (!onGround)
+        {
+            if (state == PlayerStates.OnGround)
+            {
+                state = PlayerStates.OnAir;
+                StopCoroutine("StartCoyoteTimeCounter");
+                StartCoroutine(StartCoyoteTimeCounter());
+            }
+        }
+        else
+        {
+            if (state == PlayerStates.Jumping || state == PlayerStates.OnAir)
+            {
+                state = PlayerStates.OnGround;
+                coyoteTimeCounter = coyoteTime;
+            }
+        }
     }
     #endregion
 }
