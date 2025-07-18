@@ -10993,6 +10993,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4971657733031801314, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
+      propertyPath: m_Mass
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4971657733031801314, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
+      propertyPath: m_ImplicitCom
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4971657733031801314, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
+      propertyPath: m_Interpolate
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4971657733031801314, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
+      propertyPath: m_CenterOfMass.y
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4971657733031801314, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
+      propertyPath: m_CollisionDetection
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8269249422757456028, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
       propertyPath: m_Name
       value: Player
