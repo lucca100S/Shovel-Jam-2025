@@ -14,7 +14,7 @@ public class GrapplingHook : MonoBehaviour
     [SerializeField] float retrieveDelayTime;
     [SerializeField] LayerMask canAttatchTo;
     public int maxNbOfRopes = 1;
-    int currentNbOfRopes;
+    public int currentNbOfRopes;
 
     [Header("Grappling Hook Parts")]
     [SerializeField] Transform gun;
@@ -28,7 +28,8 @@ public class GrapplingHook : MonoBehaviour
 
     [Header("Rapel Settings")]
     [SerializeField] bool rapelEnabled = false;
-    [SerializeField] float rapelSpeed;
+    [SerializeField] float shortenSpeed = 100;
+    [SerializeField] float extendSpeed = 200;
     [SerializeField] float maxRapelDistance = 4;
     
 
@@ -46,7 +47,6 @@ public class GrapplingHook : MonoBehaviour
 
     float rapelInput;
     float initialRopeLength;
-    public float springVariationCoefficient;
 
     private void Awake()
     {
@@ -93,7 +93,7 @@ public class GrapplingHook : MonoBehaviour
     #region Shooting
     void ShootHook(InputAction.CallbackContext context)
     {
-        if (grapplingHookEnabled && state != GrapplingHookStates.Shooting && currentNbOfRopes > 0)
+        if (grapplingHookEnabled && (state != GrapplingHookStates.Shooting && state != GrapplingHookStates.Attached) && currentNbOfRopes > 0)
         {
             float shootingDuration;
             state = GrapplingHookStates.Shooting;
@@ -104,7 +104,6 @@ public class GrapplingHook : MonoBehaviour
                 shootingDuration = Vector3.Distance(gunTip.transform.position, hit.point) / shootingSpeed;
                 Debug.Log("Hit");
                 currentNbOfRopes--;
-                state = GrapplingHookStates.Attached;
                 gunTip.transform.DOMove(hit.point, shootingDuration).OnComplete(() => SetUpGrapplingHook()).SetEase(Ease.Linear);
             }
             else
@@ -135,6 +134,7 @@ public class GrapplingHook : MonoBehaviour
         }
 
         state = GrapplingHookStates.Retrieving;
+        EventBus.Instance.hookReleased.Invoke();
         Destroy(joint);
 
         gunTipLastPosition = gunTip.transform.position;
@@ -158,6 +158,9 @@ public class GrapplingHook : MonoBehaviour
         joint.autoConfigureConnectedAnchor = false;
         initialRopeLength = Vector3.Distance(gunEnd.position, gunTip.transform.position);
         LoadJointParameters(initialRopeLength);
+
+        state = GrapplingHookStates.Attached;
+        EventBus.Instance.hookAttached.Invoke();
     }
 
     void ResetGrapplingHook()
@@ -176,8 +179,8 @@ public class GrapplingHook : MonoBehaviour
 
     void LoadJointParameters(float distance)
     {
-        joint.maxDistance = distance * jointParameters.maxDistanceModifier;
-        joint.minDistance = distance * jointParameters.minDistanceModifier;
+        joint.maxDistance = distance + jointParameters.maxDistanceModifier;
+        joint.minDistance = distance + jointParameters.minDistanceModifier;
 
         joint.spring = jointParameters.spring;
         joint.damper = jointParameters.damper;
@@ -195,18 +198,14 @@ public class GrapplingHook : MonoBehaviour
 
             if (rapelInput != 0)
             {
-                float rapelDistance = rapelInput * rapelSpeed * Time.deltaTime;
+                float rapelSpeed = rapelInput == 1? shortenSpeed : extendSpeed;
+                float rapelDistance = Mathf.Abs(Vector3.Distance(gunEnd.position, gunTip.transform.position)) - rapelInput * rapelSpeed * Time.deltaTime;
 
-                transform.Translate(Vector3.down * rapelDistance);
-
-                //joint.maxDistance = (rapelDistance - initialRopeLength) * jointParameters.maxDistanceModifier;
-                //joint.minDistance = (rapelDistance - initialRopeLength) * jointParameters.minDistanceModifier;
-
-                //joint.spring = springVariationCoefficient * (rapelDistance - initialRopeLength) + jointParameters.spring;
-
-                //Debug.Log($"Rapel distance: {rapelDistance}");
-                //Debug.Log($"initialRopeLength: {initialRopeLength}");
-                //Debug.Log($"Spring: {joint.spring}");
+                if (Mathf.Abs(rapelDistance - initialRopeLength) < maxRapelDistance)
+                {
+                    joint.maxDistance = rapelDistance + jointParameters.maxDistanceModifier;
+                    joint.minDistance = rapelDistance + jointParameters.minDistanceModifier;
+                }
             }
         }
     }

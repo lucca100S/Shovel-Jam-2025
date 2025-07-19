@@ -56,6 +56,8 @@ public class PlayerController : MonoBehaviour
         jumpAction.performed += StartJumbBufferCounter;
         jumpAction.canceled += StoppedPressingJump;
         EventBus.Instance.checkOnGround += CheckOnGround;
+        EventBus.Instance.hookAttached += ResetGravity;
+        EventBus.Instance.hookReleased += IncreaseGravity;
     }
 
     private void OnDisable()
@@ -65,6 +67,8 @@ public class PlayerController : MonoBehaviour
         jumpAction.performed -= StartJumbBufferCounter;
         jumpAction.canceled -= StoppedPressingJump;
         EventBus.Instance.checkOnGround -= CheckOnGround;
+        EventBus.Instance.hookAttached -= ResetGravity;
+        EventBus.Instance.hookReleased -= IncreaseGravity;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -78,6 +82,7 @@ public class PlayerController : MonoBehaviour
         bodyMesh = GameObject.Find("BodyMesh");
 
         coyoteTimeCounter = coyoteTime;
+        gravityMultiplier = landingGravityIncreaseMultiplier;
     }
 
     private void Update()
@@ -99,8 +104,7 @@ public class PlayerController : MonoBehaviour
         {
             gravityMultiplier = landingGravityIncreaseMultiplier;
             increasedGravityApplied = true;
-            UpdateGravity();
-            gravityMultiplier = 1; // Restarts gravityMultiplier for next jump
+            IncreaseGravity();
         }
 
         LimitPlayerHorizontalSpeed();
@@ -193,7 +197,7 @@ public class PlayerController : MonoBehaviour
         if (coyoteTimeCounter > 0 && jumpBufferCounter > 0)
         {
             Debug.Log("Jump");
-            UpdateGravity();
+            ResetGravity();
             float initialVerticalVelocity = GetInitialVerticalVelocity();
  
             currentVelocity.y = initialVerticalVelocity;
@@ -219,6 +223,18 @@ public class PlayerController : MonoBehaviour
 
         float gravity = -2 * jumpHeight / Mathf.Pow(jumpHalfDuration, 2) * gravityMultiplier;
         Physics.gravity = new Vector3(0, gravity, 0);
+    }
+
+    void ResetGravity()
+    {
+        gravityMultiplier = 1;
+        UpdateGravity();
+    }
+
+    void IncreaseGravity()
+    {
+        gravityMultiplier = landingGravityIncreaseMultiplier;
+        UpdateGravity();
     }
 
     float GetInitialVerticalVelocity()
@@ -280,6 +296,8 @@ public class PlayerController : MonoBehaviour
             {
                 state = PlayerStates.OnGround;
                 coyoteTimeCounter = coyoteTime;
+                
+
                 EventBus.Instance.landedOnGround.Invoke();
             }
         }

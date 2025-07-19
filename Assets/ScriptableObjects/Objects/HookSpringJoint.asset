@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d74bb2b3eb331e4cb292b3b00317c1d, type: 3}
   m_Name: HookSpringJoint
   m_EditorClassIdentifier: 
-  maxDistanceModifier: 0.8
-  minDistanceModifier: 0.25
+  maxDistanceModifier: 0.1
+  minDistanceModifier: -0.1
   spring: 50
   damper: 7
   massScale: 1

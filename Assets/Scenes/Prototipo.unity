@@ -17076,6 +17076,23 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4851570544282448773, guid: 2452d21393ed2764aaaba2f48442ac67, type: 3}
   m_PrefabInstance: {fileID: 1739508881}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1742101694 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3754718771419083141, guid: 399ccbd88bd055d4886fc18e7b18812f, type: 3}
+  m_PrefabInstance: {fileID: 1148088511988815189}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1742101697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1742101694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f49415e36c130da4d9893f7765840d3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1750115714
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21019,7 +21036,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3754718771419083141, guid: 399ccbd88bd055d4886fc18e7b18812f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1742101697}
   m_SourcePrefab: {fileID: 100100000, guid: 399ccbd88bd055d4886fc18e7b18812f, type: 3}
 --- !u!1001 &2320852024955853904
 PrefabInstance:
@@ -21068,6 +21088,14 @@ PrefabInstance:
     - target: {fileID: 2892718273535306105, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4680781368409311460, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
+      propertyPath: maxDistance
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4680781368409311460, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
+      propertyPath: maxRapelDistance
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8269249422757456028, guid: 838ce4090f90f634cb39d4688647835e, type: 3}
       propertyPath: m_Name
