@@ -106,7 +106,7 @@ public class PlayerController : MonoBehaviour
 
         Jump();
 
-        if ((rb.linearVelocity.y < changeJumpGravityThreshold || !pressingJump) && !increasedGravityApplied)
+        if ((rb.linearVelocity.y < changeJumpGravityThreshold || (!pressingJump && !onWall)) && !increasedGravityApplied)
         {
             increasedGravityApplied = true;
             IncreaseGravity();
