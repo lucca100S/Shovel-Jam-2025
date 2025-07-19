@@ -172,13 +172,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grapplingHookEnabled: 1
-  maxDistance: 8
+  maxDistance: 10
   shootingSpeed: 40
   retrieveSpeed: 8
   retrieveDelayTime: 0.15
   canAttatchTo:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 320
   maxNbOfRopes: 2
   currentNbOfRopes: 0
   gun: {fileID: 6709639882585585284}
@@ -190,7 +190,7 @@ MonoBehaviour:
   rapelEnabled: 1
   shortenSpeed: 100
   extendSpeed: 220
-  maxRapelDistance: 4
+  maxRapelDistance: 3
 --- !u!1 &8393561397577501693
 GameObject:
   m_ObjectHideFlags: 0

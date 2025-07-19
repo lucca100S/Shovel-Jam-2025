@@ -15,9 +15,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float jumpHeight = 2;
     [SerializeField] float jumpTotalDuration = 1;
     [SerializeField] float landingGravityIncreaseMultiplier = 1;
+    [SerializeField] int maxNbOfWallJumps = 1;
+    [SerializeField] float wallJumpHorizontalStrength;
     [SerializeField] float coyoteTime = 0.2f;
     [SerializeField] float jumpBuffer = 0.2f;
     [SerializeField] LayerMask groundLayerMask;
+    [SerializeField] LayerMask wallLayerMask;
 
     [Header("Input Map")]
     public InputActionAsset inputActions;
@@ -41,10 +44,12 @@ public class PlayerController : MonoBehaviour
 
     bool increasedGravityApplied = false;
     float changeJumpGravityThreshold = -0.01f;
-    float gravityMultiplier = 1;
 
     float coyoteTimeCounter;
     float jumpBufferCounter = 0;
+
+    bool onWall = false;
+    int currentNbOfWallJumps;
 
     private void OnEnable()
     {
@@ -82,7 +87,8 @@ public class PlayerController : MonoBehaviour
         bodyMesh = GameObject.Find("BodyMesh");
 
         coyoteTimeCounter = coyoteTime;
-        gravityMultiplier = landingGravityIncreaseMultiplier;
+        currentNbOfWallJumps = maxNbOfWallJumps;
+        IncreaseGravity();
     }
 
     private void Update()
@@ -102,7 +108,6 @@ public class PlayerController : MonoBehaviour
 
         if ((rb.linearVelocity.y < changeJumpGravityThreshold || !pressingJump) && !increasedGravityApplied)
         {
-            gravityMultiplier = landingGravityIncreaseMultiplier;
             increasedGravityApplied = true;
             IncreaseGravity();
         }
@@ -120,31 +125,33 @@ public class PlayerController : MonoBehaviour
     {
         moveInput = moveAction.ReadValue<float>();
 
-        if (moveInput != 0)
+        if (!onWall)
         {
-            decelerationTimer = decelerationCurve[0].time; // Set timer to the beginning of the curve
-            if (Mathf.Sign(moveInput) == Mathf.Sign(currentVelocity.x))
+            if (moveInput != 0)
             {
-                //currentAcceleration = acceleration * Time.deltaTime;
-                acceleration.x = Mathf.Sign(moveInput) * accelerationCurve.Evaluate(accelerationTimer);
+                decelerationTimer = decelerationCurve[0].time; // Set timer to the beginning of the curve
+                if (Mathf.Sign(moveInput) == Mathf.Sign(currentVelocity.x))
+                {
+                    //currentAcceleration = acceleration * Time.deltaTime;
+                    acceleration.x = Mathf.Sign(moveInput) * accelerationCurve.Evaluate(accelerationTimer);
+                }
+                else
+                {
+                    acceleration.x = Mathf.Sign(moveInput) * turnAcceleration;
+                    accelerationTimer = accelerationCurve[0].time; // Set timer to the beginning of the curve
+                }
+                accelerationTimer += Time.deltaTime;
             }
             else
             {
-                acceleration.x = Mathf.Sign(moveInput) * turnAcceleration;
+                int decelerationSign = SetDecelerationSign();
+                acceleration.x = decelerationSign * decelerationCurve.Evaluate(decelerationTimer);
+
+                decelerationTimer += Time.deltaTime;
                 accelerationTimer = accelerationCurve[0].time; // Set timer to the beginning of the curve
             }
-            accelerationTimer += Time.deltaTime;
+            rb.linearVelocity += acceleration * Time.deltaTime;
         }
-        else
-        {
-            int decelerationSign = SetDecelerationSign();
-            acceleration.x = decelerationSign * decelerationCurve.Evaluate(decelerationTimer);
-
-            decelerationTimer += Time.deltaTime;
-            accelerationTimer = accelerationCurve[0].time; // Set timer to the beginning of the curve
-        }
-        rb.linearVelocity += acceleration * Time.deltaTime;
-
     }
 
     void LimitPlayerHorizontalSpeed()
@@ -194,19 +201,27 @@ public class PlayerController : MonoBehaviour
     #region Jump
     void Jump()
     {
-        if (coyoteTimeCounter > 0 && jumpBufferCounter > 0)
+        if ((onWall || coyoteTimeCounter > 0) && jumpBufferCounter > 0)
         {
             Debug.Log("Jump");
             ResetGravity();
             float initialVerticalVelocity = GetInitialVerticalVelocity();
  
             currentVelocity.y = initialVerticalVelocity;
-            rb.linearVelocity = currentVelocity;
 
             coyoteTimeCounter = 0;
             jumpBufferCounter = 0;
             state = PlayerStates.Jumping;
             increasedGravityApplied = false;
+
+            if (onWall)
+            {
+                Debug.Log(moveInput);
+                rb.AddForce(moveInput * wallJumpHorizontalStrength * Vector3.right);
+                onWall = false;
+            }
+
+            rb.linearVelocity = currentVelocity;
         }
     }
 
@@ -217,7 +232,7 @@ public class PlayerController : MonoBehaviour
         return onGround;
     }
 
-    void UpdateGravity()
+    void UpdateGravity(float gravityMultiplier)
     {
         float jumpHalfDuration = jumpTotalDuration / 2;
 
@@ -227,14 +242,12 @@ public class PlayerController : MonoBehaviour
 
     void ResetGravity()
     {
-        gravityMultiplier = 1;
-        UpdateGravity();
+        UpdateGravity(1);
     }
 
     void IncreaseGravity()
     {
-        gravityMultiplier = landingGravityIncreaseMultiplier;
-        UpdateGravity();
+        UpdateGravity(landingGravityIncreaseMultiplier);
     }
 
     float GetInitialVerticalVelocity()
@@ -296,10 +309,25 @@ public class PlayerController : MonoBehaviour
             {
                 state = PlayerStates.OnGround;
                 coyoteTimeCounter = coyoteTime;
-                
+                currentNbOfWallJumps = maxNbOfWallJumps;
 
                 EventBus.Instance.landedOnGround.Invoke();
             }
+        }
+    }
+    #endregion
+
+    #region Wall Jump
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (currentNbOfWallJumps > 0 && collision.gameObject.CompareTag("Wall") && !onGround)
+        {
+            Debug.Log("AttachToWall");
+            currentVelocity = Vector3.zero;
+            rb.linearVelocity = currentVelocity;
+            UpdateGravity(0);
+            onWall = true;
+            currentNbOfWallJumps--;
         }
     }
     #endregion

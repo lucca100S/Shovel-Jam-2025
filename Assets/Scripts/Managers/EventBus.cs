@@ -20,6 +20,5 @@ public class EventBus : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        DontDestroyOnLoad(gameObject);
     }
 }
