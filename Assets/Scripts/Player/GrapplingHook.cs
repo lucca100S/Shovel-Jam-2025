@@ -14,7 +14,7 @@ public class GrapplingHook : MonoBehaviour
     [SerializeField] float retrieveDelayTime;
     [SerializeField] LayerMask canAttatchTo;
     public int maxNbOfRopes = 1;
-    [SerializeField] int currentNbOfRopes;
+    int currentNbOfRopes;
 
     [Header("Grappling Hook Parts")]
     [SerializeField] Transform gun;
@@ -25,11 +25,17 @@ public class GrapplingHook : MonoBehaviour
     [Header("Rope Settings")]
     [SerializeField] JointParameters jointParameters;
     [SerializeField] LineRenderer lineRenderer;
+
+    [Header("Rapel Settings")]
+    [SerializeField] bool rapelEnabled = false;
+    [SerializeField] float rapelSpeed;
+    [SerializeField] float maxRapelDistance = 4;
     
 
     InputActionAsset inputActions;
     InputAction shootAction;
     InputAction retrieveAction;
+    InputAction rapelAction;
 
     Vector3 gunTipStartLocalPos;
     Vector3 gunTipLastPosition;
@@ -37,6 +43,10 @@ public class GrapplingHook : MonoBehaviour
     Vector3 lookAtPos;
     SpringJoint joint;
     Rigidbody gunTipRb;
+
+    float rapelInput;
+    float initialRopeLength;
+    public float springVariationCoefficient;
 
     private void Awake()
     {
@@ -55,6 +65,7 @@ public class GrapplingHook : MonoBehaviour
 
         shootAction = inputActions.FindAction("Shoot");
         retrieveAction = inputActions.FindAction("Retrieve");
+        rapelAction = inputActions.FindAction("Rapel");
 
         shootAction.performed += ShootHook;
         retrieveAction.performed += RetrieveHook;
@@ -75,8 +86,11 @@ public class GrapplingHook : MonoBehaviour
         LookAtTarget();
 
         DrawRope();
+
+        Rapel();
     }
 
+    #region Shooting
     void ShootHook(InputAction.CallbackContext context)
     {
         if (grapplingHookEnabled && state != GrapplingHookStates.Shooting && currentNbOfRopes > 0)
@@ -142,8 +156,8 @@ public class GrapplingHook : MonoBehaviour
         joint.connectedBody = gunTipRb;
 
         joint.autoConfigureConnectedAnchor = false;
-        float distanceFromHitPoint = Vector3.Distance(gunEnd.position, gunTip.transform.position);
-        LoadJointParameters(distanceFromHitPoint);
+        initialRopeLength = Vector3.Distance(gunEnd.position, gunTip.transform.position);
+        LoadJointParameters(initialRopeLength);
     }
 
     void ResetGrapplingHook()
@@ -152,6 +166,48 @@ public class GrapplingHook : MonoBehaviour
         {
             state = GrapplingHookStates.Ready;
             currentNbOfRopes = maxNbOfRopes;
+        }
+    }
+
+    void SetGunTipConstraints()
+    {
+        gunTipRb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezePositionZ;
+    }
+
+    void LoadJointParameters(float distance)
+    {
+        joint.maxDistance = distance * jointParameters.maxDistanceModifier;
+        joint.minDistance = distance * jointParameters.minDistanceModifier;
+
+        joint.spring = jointParameters.spring;
+        joint.damper = jointParameters.damper;
+        joint.massScale = jointParameters.massScale;
+    }
+    #endregion
+
+    void Rapel()
+    {
+        // Work in progress
+
+        if (rapelEnabled && state == GrapplingHookStates.Attached)
+        {
+            rapelInput = rapelAction.ReadValue<float>();
+
+            if (rapelInput != 0)
+            {
+                float rapelDistance = rapelInput * rapelSpeed * Time.deltaTime;
+
+                transform.Translate(Vector3.down * rapelDistance);
+
+                //joint.maxDistance = (rapelDistance - initialRopeLength) * jointParameters.maxDistanceModifier;
+                //joint.minDistance = (rapelDistance - initialRopeLength) * jointParameters.minDistanceModifier;
+
+                //joint.spring = springVariationCoefficient * (rapelDistance - initialRopeLength) + jointParameters.spring;
+
+                //Debug.Log($"Rapel distance: {rapelDistance}");
+                //Debug.Log($"initialRopeLength: {initialRopeLength}");
+                //Debug.Log($"Spring: {joint.spring}");
+            }
         }
     }
 
@@ -173,21 +229,6 @@ public class GrapplingHook : MonoBehaviour
                 break;
         }
         gun.LookAt(lookAtPos);
-    }
-
-    void SetGunTipConstraints()
-    {
-        gunTipRb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezePositionZ;
-    }
-
-    void LoadJointParameters(float distance)
-    {
-        joint.maxDistance = distance * jointParameters.maxDistanceModifier;
-        joint.minDistance = distance * jointParameters.minDistanceModifier;
-
-        joint.spring = jointParameters.spring;
-        joint.damper = jointParameters.damper;
-        joint.massScale = jointParameters.massScale;
     }
 
     void DrawRope()

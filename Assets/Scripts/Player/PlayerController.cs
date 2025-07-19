@@ -104,7 +104,6 @@ public class PlayerController : MonoBehaviour
         }
 
         LimitPlayerHorizontalSpeed();
-        Debug.Log(currentVelocity);
     }
 
     private void LateUpdate()

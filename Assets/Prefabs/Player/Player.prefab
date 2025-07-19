@@ -180,13 +180,16 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   maxNbOfRopes: 2
-  currentNbOfRopes: 0
   gun: {fileID: 6709639882585585284}
   gunShootingPoint: {fileID: 3794343621250749716}
   gunEnd: {fileID: 8076057512368025431}
   gunTip: {fileID: 4229349293836314353}
   jointParameters: {fileID: 11400000, guid: f2da6fdc95dbe674a9c890baa357ddbb, type: 2}
   lineRenderer: {fileID: 44455223173824598}
+  rapelEnabled: 0
+  rapelSpeed: 5
+  maxRapelDistance: 4
+  springVariationCoefficient: -1.2
 --- !u!1 &8393561397577501693
 GameObject:
   m_ObjectHideFlags: 0
