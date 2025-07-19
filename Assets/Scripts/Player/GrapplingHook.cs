@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using DG.Tweening;
 
 [RequireComponent(typeof(PlayerController))]
 public class GrapplingHook : MonoBehaviour
@@ -8,6 +9,9 @@ public class GrapplingHook : MonoBehaviour
 
     [Header("Shooting Settings")]
     [SerializeField] float maxDistance = 8;
+    [SerializeField] float shootingSpeed = 40;
+    [SerializeField] float retrieveSpeed = 40;
+    [SerializeField] float retrieveDelayTime;
     [SerializeField] LayerMask canAttatchTo;
     public int maxNbOfRopes = 1;
     [SerializeField] int currentNbOfRopes;
@@ -21,13 +25,14 @@ public class GrapplingHook : MonoBehaviour
     [Header("Rope Settings")]
     [SerializeField] JointParameters jointParameters;
     [SerializeField] LineRenderer lineRenderer;
-    [SerializeField] float retrieveTime;
+    
 
     InputActionAsset inputActions;
     InputAction shootAction;
     InputAction retrieveAction;
 
     Vector3 gunTipStartLocalPos;
+    Vector3 gunTipLastPosition;
     GrapplingHookStates state = GrapplingHookStates.Ready;
     Vector3 lookAtPos;
     SpringJoint joint;
@@ -76,30 +81,22 @@ public class GrapplingHook : MonoBehaviour
     {
         if (grapplingHookEnabled && state != GrapplingHookStates.Shooting && currentNbOfRopes > 0)
         {
+            float shootingDuration;
             state = GrapplingHookStates.Shooting;
             lineRenderer.positionCount = 2;
             Vector3 shootingDirection = lookAtPos - gunShootingPoint.position;
             if (Physics.Raycast(gunShootingPoint.position, shootingDirection, out RaycastHit hit, maxDistance, canAttatchTo))
             {
+                shootingDuration = Vector3.Distance(gunTip.transform.position, hit.point) / shootingSpeed;
                 Debug.Log("Hit");
                 currentNbOfRopes--;
                 state = GrapplingHookStates.Attached;
-                gunTip.transform.position = hit.point;
-
-                joint = gameObject.AddComponent<SpringJoint>();
-                
-                SetGunTipConstraints();
-                gunTip.transform.parent = null;
-                joint.connectedBody = gunTipRb;
-
-                joint.autoConfigureConnectedAnchor = false;
-                float distanceFromHitPoint = Vector3.Distance(gunEnd.position, gunTip.transform.position);
-                LoadJointParameters(distanceFromHitPoint);
+                gunTip.transform.DOMove(hit.point, shootingDuration).OnComplete(() => SetUpGrapplingHook()).SetEase(Ease.Linear);
             }
             else
             {
-                gunTip.transform.position = gunEnd.position + gunEnd.forward * maxDistance;
-                Invoke("CallRetrieveHook", retrieveTime);
+                shootingDuration = maxDistance / shootingSpeed;
+                gunTip.transform.DOMove(gunEnd.position + gunEnd.forward * maxDistance, shootingDuration).OnComplete(() => Invoke("CallRetrieveHook", retrieveDelayTime)).SetEase(Ease.OutCubic);
                 Debug.Log("Not hit");
             }
         }
@@ -122,11 +119,31 @@ public class GrapplingHook : MonoBehaviour
                 currentNbOfRopes = maxNbOfRopes;
             }
         }
-        state = GrapplingHookStates.Released;
+
+        state = GrapplingHookStates.Retrieving;
         Destroy(joint);
+
+        gunTipLastPosition = gunTip.transform.position;
         gunTip.transform.parent = gun;
-        gunTip.transform.localPosition = gunTipStartLocalPos;
-        gunTip.transform.localEulerAngles = Vector3.zero;
+        float retrievingDuration = Vector3.Distance(gunTipStartLocalPos, gun.transform.localPosition) / retrieveSpeed;
+        gunTip.transform.DOLocalMove(gunTipStartLocalPos, retrievingDuration).SetEase(Ease.InCubic).OnComplete(() =>
+        {
+            gunTip.transform.localEulerAngles = Vector3.zero;
+            state = GrapplingHookStates.Released;
+        });
+    }
+
+    void SetUpGrapplingHook()
+    {
+        joint = gameObject.AddComponent<SpringJoint>();
+
+        SetGunTipConstraints();
+        gunTip.transform.parent = null;
+        joint.connectedBody = gunTipRb;
+
+        joint.autoConfigureConnectedAnchor = false;
+        float distanceFromHitPoint = Vector3.Distance(gunEnd.position, gunTip.transform.position);
+        LoadJointParameters(distanceFromHitPoint);
     }
 
     void ResetGrapplingHook()
@@ -150,6 +167,9 @@ public class GrapplingHook : MonoBehaviour
                 break;
             case GrapplingHookStates.Attached:
                 lookAtPos = gunTip.transform.position;
+                break;
+            case GrapplingHookStates.Retrieving:
+                lookAtPos = gunTipLastPosition;
                 break;
         }
         gun.LookAt(lookAtPos);

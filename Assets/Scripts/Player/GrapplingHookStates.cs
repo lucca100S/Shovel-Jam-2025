@@ -5,5 +5,6 @@ public enum GrapplingHookStates
     Ready = 0,
     Shooting = 1,
     Attached = 2,
-    Released = 3,
+    Retrieving = 3,
+    Released = 4,
 }

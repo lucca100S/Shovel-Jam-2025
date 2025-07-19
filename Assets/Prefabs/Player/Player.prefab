@@ -104,7 +104,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 21.75
+      value: 13.5
       inSlope: 0
       outSlope: 0
       tangentMode: 34
@@ -113,7 +113,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
-      value: 21.75
+      value: 13.5
       inSlope: 0
       outSlope: 0
       tangentMode: 34
@@ -128,7 +128,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: -1.25
+      value: -18.75
       inSlope: 0
       outSlope: 0
       tangentMode: 34
@@ -137,7 +137,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
-      value: -1.25
+      value: -18.75
       inSlope: 0
       outSlope: 0
       tangentMode: 34
@@ -148,7 +148,8 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   turnAcceleration: 70
-  maxSpeed: 15
+  maxHorizontalSpeed: 20
+  maxVerticalSpeed: 30
   jumpHeight: 4
   jumpTotalDuration: 1.5
   landingGravityIncreaseMultiplier: 3
@@ -172,6 +173,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grapplingHookEnabled: 1
   maxDistance: 8
+  shootingSpeed: 40
+  retrieveSpeed: 8
+  retrieveDelayTime: 0.15
   canAttatchTo:
     serializedVersion: 2
     m_Bits: 64
@@ -183,7 +187,6 @@ MonoBehaviour:
   gunTip: {fileID: 4229349293836314353}
   jointParameters: {fileID: 11400000, guid: f2da6fdc95dbe674a9c890baa357ddbb, type: 2}
   lineRenderer: {fileID: 44455223173824598}
-  retrieveTime: 1
 --- !u!1 &8393561397577501693
 GameObject:
   m_ObjectHideFlags: 0
