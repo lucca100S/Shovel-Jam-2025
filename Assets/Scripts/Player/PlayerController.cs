@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour
     [Header("Movement Parameters")]
     [SerializeField] AnimationCurve accelerationCurve;
     [SerializeField] AnimationCurve decelerationCurve;
-    [SerializeField] float turnSpeed = 70;
+    [SerializeField] float turnAcceleration = 70;
     [SerializeField] float maxSpeed = 20;
 
     [Header("Jump Parameters")]
@@ -19,16 +19,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField] LayerMask groundLayerMask;
 
     [Header("Input Map")]
-    [SerializeField] InputActionAsset inputActions;
+    public InputActionAsset inputActions;
     InputAction moveAction;
     InputAction jumpAction;
 
     Rigidbody rb;
     float moveInput;
     Vector3 currentVelocity;
+    Vector3 acceleration = Vector3.zero;
     float desiredVelocity;
     float accelerationTimer;
     float decelerationTimer;
+    GameObject bodyMesh;
+    Vector3 cursorPos;
+    Vector3 newScale;
 
     PlayerStates state = PlayerStates.OnGround;
     bool pressingJump = false;
@@ -45,25 +49,33 @@ public class PlayerController : MonoBehaviour
     private void OnEnable()
     {
         inputActions.FindActionMap("Player").Enable();
+
+        moveAction = inputActions.FindAction("Move");
+        jumpAction = inputActions.FindAction("Jump");
+
+        jumpAction.performed += StartJumbBufferCounter;
+        jumpAction.canceled += StoppedPressingJump;
+        EventBus.Instance.checkOnGround += CheckOnGround;
     }
 
     private void OnDisable()
     {
         inputActions.FindActionMap("Player").Disable();
+
+        jumpAction.performed -= StartJumbBufferCounter;
+        jumpAction.canceled -= StoppedPressingJump;
+        EventBus.Instance.checkOnGround -= CheckOnGround;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        moveAction = inputActions.FindAction("Move");
-        jumpAction = inputActions.FindAction("Jump");
-
         rb = GetComponent<Rigidbody>();
+
         accelerationTimer = accelerationCurve[0].time; // Set timer to the beginning of the curve
         decelerationTimer = decelerationCurve[decelerationCurve.length - 1].time; // Set timer to the end of the curve
 
-        jumpAction.performed += StartJumbBufferCounter;
-        jumpAction.canceled += StoppedPressingJump;
+        bodyMesh = GameObject.Find("BodyMesh");
 
         coyoteTimeCounter = coyoteTime;
     }
@@ -72,11 +84,7 @@ public class PlayerController : MonoBehaviour
     {
         CheckOnGround();
 
-
-        //Debug.Log(onGround);
-        //Debug.Log(state);
-        //Debug.Log(coyoteTimeCounter);
-        Debug.Log(pressingJump);
+        SetPlayerDirection();
     }
 
     private void FixedUpdate()
@@ -94,6 +102,9 @@ public class PlayerController : MonoBehaviour
             UpdateGravity();
             gravityMultiplier = 1; // Restarts gravityMultiplier for next jump
         }
+
+        LimitPlayerHorizontalSpeed();
+        Debug.Log(currentVelocity);
     }
 
     private void LateUpdate()
@@ -101,6 +112,7 @@ public class PlayerController : MonoBehaviour
         HandleState();
     }
 
+    #region Move
     void Move()
     {
         moveInput = moveAction.ReadValue<float>();
@@ -112,30 +124,76 @@ public class PlayerController : MonoBehaviour
             if (Mathf.Sign(moveInput) == Mathf.Sign(currentVelocity.x))
             {
                 //currentAcceleration = acceleration * Time.deltaTime;
-                currentVelocity.x = desiredVelocity * accelerationCurve.Evaluate(accelerationTimer);
+                acceleration.x = Mathf.Sign(moveInput) * accelerationCurve.Evaluate(accelerationTimer);
             }
             else
             {
-                currentVelocity.x = Mathf.MoveTowards(currentVelocity.x, desiredVelocity, turnSpeed * Time.deltaTime);
+                acceleration.x = Mathf.Sign(moveInput) * turnAcceleration;
                 accelerationTimer = accelerationCurve[0].time; // Set timer to the beginning of the curve
             }
             accelerationTimer += Time.deltaTime;
         }
         else
         {
-            currentVelocity.x = currentVelocity.x * decelerationCurve.Evaluate(decelerationTimer);
+            int decelerationSign = SetDecelerationSign();
+            acceleration.x = decelerationSign * decelerationCurve.Evaluate(decelerationTimer);
 
             decelerationTimer += Time.deltaTime;
             accelerationTimer = accelerationCurve[0].time; // Set timer to the beginning of the curve
         }
-        rb.linearVelocity = currentVelocity;
+        rb.linearVelocity += acceleration * Time.deltaTime;
+
     }
+
+    void LimitPlayerHorizontalSpeed()
+    {
+        Vector3 velocity = rb.linearVelocity;
+        velocity.x = Mathf.Clamp(velocity.x, -maxSpeed, maxSpeed);
+        rb.linearVelocity = velocity;
+    }
+
+    int SetDecelerationSign()
+    {
+        if (currentVelocity.x > 0)
+        {
+            return 1;
+        } else if (currentVelocity.x < 0)
+        {
+            return -1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    void SetPlayerDirection()
+    {
+        cursorPos = CursorTracker.Instance.cursorPos;
+        cursorPos.z = cursorPos.z - (Camera.main.transform.position.z);
+        cursorPos = Camera.main.ScreenToWorldPoint(cursorPos);
+
+        if (bodyMesh.transform.localScale.x != 1 && cursorPos.x >= transform.position.x)
+        {
+            newScale = transform.localScale;
+            newScale.x = 1;
+            bodyMesh.transform.localScale = newScale;
+        }
+        else if (bodyMesh.transform.localScale.x != -1 && cursorPos.x < transform.position.x)
+        {
+            newScale = transform.localScale;
+            newScale.x = -1;
+            bodyMesh.transform.localScale = newScale;
+        }
+    }
+    #endregion
 
     #region Jump
     void Jump()
     {
         if (coyoteTimeCounter > 0 && jumpBufferCounter > 0)
         {
+            Debug.Log("Jump");
             UpdateGravity();
             float initialVerticalVelocity = GetInitialVerticalVelocity();
  
@@ -149,9 +207,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void CheckOnGround()
+    bool CheckOnGround()
     {
         onGround = Physics.Raycast(transform.position, Vector3.down, groundRaycastLength, groundLayerMask);
+
+        return onGround;
     }
 
     void UpdateGravity()
@@ -221,6 +281,7 @@ public class PlayerController : MonoBehaviour
             {
                 state = PlayerStates.OnGround;
                 coyoteTimeCounter = coyoteTime;
+                EventBus.Instance.landedOnGround.Invoke();
             }
         }
     }
