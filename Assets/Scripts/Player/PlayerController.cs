@@ -8,7 +8,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] AnimationCurve accelerationCurve;
     [SerializeField] AnimationCurve decelerationCurve;
     [SerializeField] float turnAcceleration = 70;
-    [SerializeField] float maxSpeed = 20;
+    [SerializeField] float maxHorizontalSpeed = 20;
+    [SerializeField] float maxVerticalSpeed = 30;
 
     [Header("Jump Parameters")]
     [SerializeField] float jumpHeight = 2;
@@ -27,7 +28,6 @@ public class PlayerController : MonoBehaviour
     float moveInput;
     Vector3 currentVelocity;
     Vector3 acceleration = Vector3.zero;
-    float desiredVelocity;
     float accelerationTimer;
     float decelerationTimer;
     GameObject bodyMesh;
@@ -116,7 +116,6 @@ public class PlayerController : MonoBehaviour
     void Move()
     {
         moveInput = moveAction.ReadValue<float>();
-        desiredVelocity = moveInput * maxSpeed;
 
         if (moveInput != 0)
         {
@@ -148,7 +147,8 @@ public class PlayerController : MonoBehaviour
     void LimitPlayerHorizontalSpeed()
     {
         Vector3 velocity = rb.linearVelocity;
-        velocity.x = Mathf.Clamp(velocity.x, -maxSpeed, maxSpeed);
+        velocity.x = Mathf.Clamp(velocity.x, -maxHorizontalSpeed, maxHorizontalSpeed);
+        velocity.y = Mathf.Clamp(velocity.y, -maxVerticalSpeed, float.PositiveInfinity);
         rb.linearVelocity = velocity;
     }
 
