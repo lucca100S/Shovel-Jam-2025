@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float jumpHeight = 2;
     [SerializeField] float jumpTotalDuration = 1;
     [SerializeField] float landingGravityIncreaseMultiplier = 1;
+    public bool unlockedWallJump = false;
     [SerializeField] int maxNbOfWallJumps = 1;
     [SerializeField] float wallJumpHorizontalStrength;
     [SerializeField] float coyoteTime = 0.2f;
@@ -320,7 +321,7 @@ public class PlayerController : MonoBehaviour
     #region Wall Jump
     private void OnCollisionEnter(Collision collision)
     {
-        if (currentNbOfWallJumps > 0 && collision.gameObject.CompareTag("Wall") && !onGround)
+        if (unlockedWallJump && currentNbOfWallJumps > 0 && collision.gameObject.CompareTag("Wall") && !onGround)
         {
             Debug.Log("AttachToWall");
             currentVelocity = Vector3.zero;

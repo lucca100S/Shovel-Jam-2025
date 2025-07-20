@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxDistanceModifier: 0.1
   minDistanceModifier: -0.1
-  spring: 50
+  spring: 100
   damper: 7
   massScale: 1

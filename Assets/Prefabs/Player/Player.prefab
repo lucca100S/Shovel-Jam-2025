@@ -104,7 +104,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 13.5
+      value: 20
       inSlope: 0
       outSlope: 0
       tangentMode: 34
@@ -113,7 +113,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
-      value: 13.5
+      value: 20
       inSlope: 0
       outSlope: 0
       tangentMode: 34
@@ -128,7 +128,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: -18.75
+      value: -50
       inSlope: 0
       outSlope: 0
       tangentMode: 34
@@ -137,7 +137,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
-      value: -18.75
+      value: -50
       inSlope: 0
       outSlope: 0
       tangentMode: 34
@@ -147,15 +147,16 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  turnAcceleration: 70
-  maxHorizontalSpeed: 20
+  turnAcceleration: 150
+  maxHorizontalSpeed: 15
   maxVerticalSpeed: 30
-  jumpHeight: 3
-  jumpTotalDuration: 1.5
-  landingGravityIncreaseMultiplier: 3
+  jumpHeight: 3.5
+  jumpTotalDuration: 0.8
+  landingGravityIncreaseMultiplier: 2
+  unlockedWallJump: 0
   maxNbOfWallJumps: 1
   wallJumpHorizontalStrength: 400
-  coyoteTime: 0.2
+  coyoteTime: 0.1
   jumpBuffer: 0.2
   groundLayerMask:
     serializedVersion: 2
@@ -177,14 +178,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grapplingHookEnabled: 1
-  maxDistance: 10
+  maxDistance: 8
   shootingSpeed: 40
   retrieveSpeed: 8
   retrieveDelayTime: 0.15
   canAttatchTo:
     serializedVersion: 2
     m_Bits: 320
-  maxNbOfRopes: 2
+  maxNbOfRopes: 1
   currentNbOfRopes: 0
   gun: {fileID: 6709639882585585284}
   gunShootingPoint: {fileID: 3794343621250749716}
