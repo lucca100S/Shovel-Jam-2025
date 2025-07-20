@@ -150,14 +150,19 @@ MonoBehaviour:
   turnAcceleration: 70
   maxHorizontalSpeed: 20
   maxVerticalSpeed: 30
-  jumpHeight: 4
+  jumpHeight: 3
   jumpTotalDuration: 1.5
   landingGravityIncreaseMultiplier: 3
+  maxNbOfWallJumps: 1
+  wallJumpHorizontalStrength: 400
   coyoteTime: 0.2
   jumpBuffer: 0.2
   groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  wallLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
   inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
 --- !u!114 &4680781368409311460
 MonoBehaviour:
