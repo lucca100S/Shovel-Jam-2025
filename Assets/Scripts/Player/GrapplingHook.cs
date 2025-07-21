@@ -42,7 +42,7 @@ public class GrapplingHook : MonoBehaviour
 
     Vector3 gunTipStartLocalPos;
     Vector3 gunTipLastPosition;
-    GrapplingHookStates state = GrapplingHookStates.Ready;
+    public GrapplingHookStates state = GrapplingHookStates.Ready;
     Vector3 lookAtPos;
     SpringJoint joint;
     Rigidbody gunTipRb;

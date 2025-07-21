@@ -329,7 +329,9 @@ public class PlayerController : MonoBehaviour
     #region Wall Jump
     private void OnCollisionEnter(Collision collision)
     {
-        if (unlockedWallJump && currentNbOfWallJumps > 0 && collision.gameObject.CompareTag("Wall") && !onGround)
+        GrapplingHookStates ghstate = transform.GetComponent<GrapplingHook>().state;
+
+        if (unlockedWallJump && currentNbOfWallJumps > 0 && collision.gameObject.CompareTag("Wall") && !onGround && ghstate != GrapplingHookStates.Attached)
         {
             Debug.Log("AttachToWall");
             currentVelocity = Vector3.zero;
