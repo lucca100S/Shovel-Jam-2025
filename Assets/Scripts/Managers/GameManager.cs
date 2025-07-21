@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     public Vector3 respawnPosition;
 
     public GameObject menuPanel;
+    public GameObject finalPanel;
     public Animator uiAnimator;
 
     public TMP_Text messageText;
@@ -84,6 +85,20 @@ public class GameManager : MonoBehaviour
         player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
     }
 
+    public void EnableFinalPanel()
+    {
+        finalPanel.gameObject.SetActive(true);
+        player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Disable();
+        player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
+    }
+
+    public void DisabelFinalPanel()
+    {
+        finalPanel.gameObject.SetActive(false);
+        player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Enable();
+        player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
+    }
+
     public void StartTransition()
     {
         uiAnimator.SetTrigger("transition");
@@ -92,6 +107,18 @@ public class GameManager : MonoBehaviour
     public void RestartGame()
     {
         EnableMenuPanel();
+        respawnPosition = new Vector3(0, 0, 0);
+        RespawnPlayer();
+    }
+
+    public void StartEndGame()
+    {
+        uiAnimator.SetTrigger("endgame");
+    }
+
+    public void EndGame()
+    {
+        EnableFinalPanel();
         respawnPosition = new Vector3(0, 0, 0);
         RespawnPlayer();
     }
