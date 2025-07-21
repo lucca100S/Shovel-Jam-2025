@@ -113,6 +113,7 @@ public class PlayerController : MonoBehaviour
             IncreaseGravity();
         }
 
+        playerAnimator.SetFloat("horizontalSpeed", Mathf.Abs(rb.linearVelocity.x));
         LimitPlayerHorizontalSpeed();
     }
 
@@ -205,7 +206,7 @@ public class PlayerController : MonoBehaviour
         if ((onWall || coyoteTimeCounter > 0) && jumpBufferCounter > 0)
         {
             Debug.Log("Jump");
-            //playerAnimator.SetTrigger("hasJumped");
+            playerAnimator.SetTrigger("hasJumped");
 
             ResetGravity();
             float initialVerticalVelocity = GetInitialVerticalVelocity();
@@ -222,6 +223,7 @@ public class PlayerController : MonoBehaviour
                 Debug.Log(moveInput);
                 rb.AddForce(moveInput * wallJumpHorizontalStrength * Vector3.right);
                 onWall = false;
+                playerAnimator.SetBool("onWall", onWall);
             }
 
             rb.linearVelocity = currentVelocity;
@@ -232,7 +234,7 @@ public class PlayerController : MonoBehaviour
     {
         onGround = Physics.Raycast(transform.position, Vector3.down, groundRaycastLength, groundLayerMask);
 
-        //playerAnimator.SetBool("onGround", onGround);
+        playerAnimator.SetBool("onGround", onGround);
         return onGround;
     }
 
@@ -332,6 +334,8 @@ public class PlayerController : MonoBehaviour
             UpdateGravity(0);
             onWall = true;
             currentNbOfWallJumps--;
+
+            playerAnimator.SetBool("onWall", onWall);
         }
     }
     #endregion

@@ -10,6 +10,14 @@ public class EventBus : MonoBehaviour
     public Action hookReleased = () => { };
     public Func<bool> checkOnGround = () => false;
 
+    private void OnDisable()
+    {
+        landedOnGround = () => { };
+        hookAttached = () => { };
+        hookReleased = () => { };
+        checkOnGround = () => false;
+    }
+
     private void Awake()
     {
         if (Instance == null)

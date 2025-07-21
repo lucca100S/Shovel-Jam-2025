@@ -102,6 +102,7 @@ public class GrapplingHook : MonoBehaviour
             Vector3 shootingDirection = lookAtPos - gunShootingPoint.position;
             if (Physics.Raycast(gunShootingPoint.position, shootingDirection, out RaycastHit hit, maxDistance, canAttatchTo))
             {
+                playerAnimator.SetBool("swinging", true);
                 shootingDuration = Vector3.Distance(gunTip.transform.position, hit.point) / shootingSpeed;
                 Debug.Log("Hit");
                 currentNbOfRopes--;
@@ -134,6 +135,7 @@ public class GrapplingHook : MonoBehaviour
             }
         }
 
+        playerAnimator.SetBool("swinging", false);
         state = GrapplingHookStates.Retrieving;
         EventBus.Instance.hookReleased.Invoke();
         Destroy(joint);
