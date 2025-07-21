@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     public Vector3 respawnPosition;
 
     public GameObject menuPanel;
+    public Animator uiAnimator;
 
     private void Awake()
     {
@@ -57,6 +58,18 @@ public class GameManager : MonoBehaviour
         menuPanel.gameObject.SetActive(true);
         player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Disable();
         player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
+    }
+
+    public void StartTransition()
+    {
+        uiAnimator.SetTrigger("transition");
+    }
+
+    public void RestartGame()
+    {
+        EnableMenuPanel();
+        respawnPosition = new Vector3(0, 1, 0);
+        RespawnPlayer();
     }
 
     #endregion
