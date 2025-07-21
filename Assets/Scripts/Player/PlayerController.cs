@@ -28,7 +28,7 @@ public class PlayerController : MonoBehaviour
     InputAction moveAction;
     InputAction jumpAction;
 
-    Rigidbody rb;
+    public Rigidbody rb;
     float moveInput;
     Vector3 currentVelocity;
     Vector3 acceleration = Vector3.zero;
