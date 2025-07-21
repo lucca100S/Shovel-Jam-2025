@@ -181,21 +181,24 @@ public class PlayerController : MonoBehaviour
 
     void SetPlayerDirection()
     {
-        cursorPos = CursorTracker.Instance.cursorPos;
-        cursorPos.z = cursorPos.z - (Camera.main.transform.position.z);
-        cursorPos = Camera.main.ScreenToWorldPoint(cursorPos);
+        if (!onWall)
+        {
+            cursorPos = CursorTracker.Instance.cursorPos;
+            cursorPos.z = cursorPos.z - (Camera.main.transform.position.z);
+            cursorPos = Camera.main.ScreenToWorldPoint(cursorPos);
 
-        if (body.transform.localScale.z != 1 && cursorPos.x >= transform.position.x)
-        {
-            newScale = transform.localScale;
-            newScale.z = 1;
-            body.transform.localScale = newScale;
-        }
-        else if (body.transform.localScale.z != -1 && cursorPos.x < transform.position.x)
-        {
-            newScale = transform.localScale;
-            newScale.z = -1;
-            body.transform.localScale = newScale;
+            if (body.transform.localScale.z != 1 && cursorPos.x >= transform.position.x)
+            {
+                newScale = transform.localScale;
+                newScale.z = 1;
+                body.transform.localScale = newScale;
+            }
+            else if (body.transform.localScale.z != -1 && cursorPos.x < transform.position.x)
+            {
+                newScale = transform.localScale;
+                newScale.z = -1;
+                body.transform.localScale = newScale;
+            }
         }
     }
     #endregion
@@ -334,6 +337,18 @@ public class PlayerController : MonoBehaviour
             UpdateGravity(0);
             onWall = true;
             currentNbOfWallJumps--;
+            if (collision.transform.position.x > transform.position.x)
+            {
+                newScale = transform.localScale;
+                newScale.z = 1;
+                body.transform.localScale = newScale;
+            }
+            else
+            {
+                newScale = transform.localScale;
+                newScale.z = -1;
+                body.transform.localScale = newScale;
+            }
 
             playerAnimator.SetBool("onWall", onWall);
         }
