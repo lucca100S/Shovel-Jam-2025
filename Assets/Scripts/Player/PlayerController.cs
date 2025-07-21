@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour
     Vector3 acceleration = Vector3.zero;
     float accelerationTimer;
     float decelerationTimer;
-    GameObject bodyMesh;
+    GameObject body;
     Vector3 cursorPos;
     Vector3 newScale;
 
@@ -83,7 +83,7 @@ public class PlayerController : MonoBehaviour
         accelerationTimer = accelerationCurve[0].time; // Set timer to the beginning of the curve
         decelerationTimer = decelerationCurve[decelerationCurve.length - 1].time; // Set timer to the end of the curve
 
-        bodyMesh = GameObject.Find("BodyMesh");
+        body = GameObject.Find("Body");
 
         coyoteTimeCounter = coyoteTime;
         currentNbOfWallJumps = maxNbOfWallJumps;
@@ -185,17 +185,17 @@ public class PlayerController : MonoBehaviour
         cursorPos.z = cursorPos.z - (Camera.main.transform.position.z);
         cursorPos = Camera.main.ScreenToWorldPoint(cursorPos);
 
-        if (bodyMesh.transform.localScale.x != 1 && cursorPos.x >= transform.position.x)
+        if (body.transform.localScale.z != 1 && cursorPos.x >= transform.position.x)
         {
             newScale = transform.localScale;
-            newScale.x = 1;
-            bodyMesh.transform.localScale = newScale;
+            newScale.z = 1;
+            body.transform.localScale = newScale;
         }
-        else if (bodyMesh.transform.localScale.x != -1 && cursorPos.x < transform.position.x)
+        else if (body.transform.localScale.z != -1 && cursorPos.x < transform.position.x)
         {
             newScale = transform.localScale;
-            newScale.x = -1;
-            bodyMesh.transform.localScale = newScale;
+            newScale.z = -1;
+            body.transform.localScale = newScale;
         }
     }
     #endregion
