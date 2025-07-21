@@ -62,8 +62,6 @@ public class GrapplingHook : MonoBehaviour
 
     private void OnEnable()
     {
-        inputActions.FindActionMap("Player").Enable();
-
         shootAction = inputActions.FindAction("Shoot");
         retrieveAction = inputActions.FindAction("Retrieve");
         rapelAction = inputActions.FindAction("Rapel");
@@ -75,8 +73,6 @@ public class GrapplingHook : MonoBehaviour
 
     private void OnDisable()
     {
-        inputActions.FindActionMap("Player").Disable();
-
         shootAction.performed -= ShootHook;
         retrieveAction.performed -= RetrieveHook;
         EventBus.Instance.landedOnGround -= ResetGrapplingHook;

@@ -54,8 +54,6 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        inputActions.FindActionMap("Player").Enable();
-
         moveAction = inputActions.FindAction("Move");
         jumpAction = inputActions.FindAction("Jump");
 
@@ -67,9 +65,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private void OnDisable()
-    {
-        inputActions.FindActionMap("Player").Disable();
-
+    { 
         jumpAction.performed -= StartJumbBufferCounter;
         jumpAction.canceled -= StoppedPressingJump;
         EventBus.Instance.checkOnGround -= CheckOnGround;

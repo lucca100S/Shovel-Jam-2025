@@ -1,11 +1,15 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
     GameObject player;
+    InputActionAsset inputAction;
     public Vector3 respawnPosition;
+
+    public GameObject menuPanel;
 
     private void Awake()
     {
@@ -24,6 +28,14 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         player = GameObject.Find("Player");
+
+        player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Disable();
+        player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
+    }
+
+    private void Update()
+    {
+        Debug.Log(player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").enabled);
     }
 
     public void RespawnPlayer()
@@ -31,4 +43,21 @@ public class GameManager : MonoBehaviour
         player.transform.position = respawnPosition;
         player.GetComponent<PlayerController>().rb.linearVelocity = Vector3.zero;
     }
+
+    #region UI Management
+    public void DisableMenuPanel()
+    {
+        menuPanel.gameObject.SetActive(false);
+        player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Enable();
+        player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
+    }
+
+    public void EnableMenuPanel()
+    {
+        menuPanel.gameObject.SetActive(true);
+        player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Disable();
+        player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
+    }
+
+    #endregion
 }
