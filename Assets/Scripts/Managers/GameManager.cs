@@ -34,10 +34,10 @@ public class GameManager : MonoBehaviour
         player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
     }
 
-    private void Update()
-    {
-        Debug.Log(player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").enabled);
-    }
+    //private void Update()
+    //{
+    //    Debug.Log(player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").enabled);
+    //}
 
     public void RespawnPlayer()
     {
@@ -68,7 +68,7 @@ public class GameManager : MonoBehaviour
     public void RestartGame()
     {
         EnableMenuPanel();
-        respawnPosition = new Vector3(0, 1, 0);
+        respawnPosition = new Vector3(0, 0, 0);
         RespawnPlayer();
     }
 
