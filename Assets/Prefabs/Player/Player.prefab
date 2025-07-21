@@ -274,7 +274,7 @@ LineRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_Positions:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 1}
@@ -1707,7 +1707,7 @@ MonoBehaviour:
   maxNbOfWallJumps: 1
   wallJumpHorizontalStrength: 400
   coyoteTime: 0.1
-  jumpBuffer: 0.2
+  jumpBuffer: 0.1
   groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
@@ -1716,6 +1716,7 @@ MonoBehaviour:
     m_Bits: 256
   inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   rb: {fileID: 0}
+  onGround: 0
 --- !u!114 &5364737020135237849
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1728,7 +1729,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 203a7a523de5e3b4fbcea4a5d9df6913, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grapplingHookEnabled: 1
+  grapplingHookEnabled: 0
   maxDistance: 8
   shootingSpeed: 40
   retrieveSpeed: 8
@@ -1742,6 +1743,7 @@ MonoBehaviour:
   gunShootingPoint: {fileID: 7169544683197948201}
   gunEnd: {fileID: 2365700701983360033}
   gunTip: {fileID: 3148905588819237188}
+  gunTipMesh: {fileID: 0}
   jointParameters: {fileID: 11400000, guid: f2da6fdc95dbe674a9c890baa357ddbb, type: 2}
   lineRenderer: {fileID: 6507555858122707382}
   rapelEnabled: 1

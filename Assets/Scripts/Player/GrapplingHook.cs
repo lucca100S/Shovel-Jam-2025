@@ -21,6 +21,7 @@ public class GrapplingHook : MonoBehaviour
     [SerializeField] Transform gunShootingPoint;
     [SerializeField] Transform gunEnd;
     [SerializeField] GameObject gunTip;
+    public GameObject gunTipMesh;
 
     [Header("Rope Settings")]
     [SerializeField] JointParameters jointParameters;
@@ -133,8 +134,11 @@ public class GrapplingHook : MonoBehaviour
                 state = GrapplingHookStates.Ready;
                 currentNbOfRopes = maxNbOfRopes;
             }
+            else
+            {
+                gunTip.SetActive(false);
+            }
         }
-
         playerAnimator.SetBool("swinging", false);
         state = GrapplingHookStates.Retrieving;
         EventBus.Instance.hookReleased.Invoke();
@@ -172,6 +176,7 @@ public class GrapplingHook : MonoBehaviour
         {
             state = GrapplingHookStates.Ready;
             currentNbOfRopes = maxNbOfRopes;
+            gunTip.SetActive(true);
         }
     }
 

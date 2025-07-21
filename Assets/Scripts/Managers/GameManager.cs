@@ -61,6 +61,7 @@ public class GameManager : MonoBehaviour
         {
             case Skills.Hook:
                 player.GetComponent<GrapplingHook>().grapplingHookEnabled = true;
+                player.GetComponent<GrapplingHook>().gunTipMesh.SetActive(true);
                 break;
             case Skills.WallJump:
                 player.GetComponent<PlayerController>().unlockedWallJump = true;
