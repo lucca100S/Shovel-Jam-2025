@@ -40,7 +40,7 @@ public class PlayerController : MonoBehaviour
 
     PlayerStates state = PlayerStates.OnGround;
     bool pressingJump = false;
-    bool onGround;
+    public bool onGround;
     float groundRaycastLength = 1.1f;
 
     bool increasedGravityApplied = false;
@@ -206,8 +206,8 @@ public class PlayerController : MonoBehaviour
         if ((onWall || coyoteTimeCounter > 0) && jumpBufferCounter > 0)
         {
             Debug.Log("Jump");
-            playerAnimator.SetTrigger("hasJumped");
 
+            playerAnimator.SetBool("jumping", true);
             ResetGravity();
             float initialVerticalVelocity = GetInitialVerticalVelocity();
  
@@ -343,6 +343,7 @@ public class PlayerController : MonoBehaviour
             state = PlayerStates.OnGround;
             coyoteTimeCounter = coyoteTime;
             currentNbOfWallJumps = maxNbOfWallJumps;
+            playerAnimator.SetBool("jumping", false);
 
             EventBus.Instance.landedOnGround.Invoke();
         }

@@ -34,15 +34,24 @@ public class GameManager : MonoBehaviour
         //player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
     }
 
-    //private void Update()
-    //{
-    //    Debug.Log(player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").enabled);
-    //}
-
     public void RespawnPlayer()
     {
         player.transform.position = respawnPosition;
         player.GetComponent<PlayerController>().rb.linearVelocity = Vector3.zero;
+        player.GetComponent<PlayerController>().onGround = true;
+    }
+
+    public void UnlockSkill(Skills skill)
+    {
+        switch (skill)
+        {
+            case Skills.Hook:
+                player.GetComponent<GrapplingHook>().grapplingHookEnabled = true;
+                break;
+            case Skills.WallJump:
+                player.GetComponent<PlayerController>().unlockedWallJump = true;
+                break;
+        }
     }
 
     #region UI Management
@@ -71,6 +80,5 @@ public class GameManager : MonoBehaviour
         respawnPosition = new Vector3(0, 0, 0);
         RespawnPlayer();
     }
-
     #endregion
 }
