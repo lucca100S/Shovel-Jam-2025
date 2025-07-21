@@ -30,8 +30,8 @@ public class GameManager : MonoBehaviour
     {
         player = GameObject.Find("Player");
 
-        player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Disable();
-        player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
+        //player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Disable();
+        //player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
     }
 
     //private void Update()

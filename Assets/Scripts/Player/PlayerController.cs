@@ -52,6 +52,8 @@ public class PlayerController : MonoBehaviour
     bool onWall = false;
     int currentNbOfWallJumps;
 
+    Animator playerAnimator;
+
     private void OnEnable()
     {
         moveAction = inputActions.FindAction("Move");
@@ -86,6 +88,8 @@ public class PlayerController : MonoBehaviour
         coyoteTimeCounter = coyoteTime;
         currentNbOfWallJumps = maxNbOfWallJumps;
         IncreaseGravity();
+
+        playerAnimator = GetComponent<Animator>();
     }
 
     private void Update()
@@ -201,6 +205,8 @@ public class PlayerController : MonoBehaviour
         if ((onWall || coyoteTimeCounter > 0) && jumpBufferCounter > 0)
         {
             Debug.Log("Jump");
+            //playerAnimator.SetTrigger("hasJumped");
+
             ResetGravity();
             float initialVerticalVelocity = GetInitialVerticalVelocity();
  
@@ -226,6 +232,7 @@ public class PlayerController : MonoBehaviour
     {
         onGround = Physics.Raycast(transform.position, Vector3.down, groundRaycastLength, groundLayerMask);
 
+        //playerAnimator.SetBool("onGround", onGround);
         return onGround;
     }
 

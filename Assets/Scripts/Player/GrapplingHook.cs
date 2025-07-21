@@ -49,6 +49,8 @@ public class GrapplingHook : MonoBehaviour
     float rapelInput;
     float initialRopeLength;
 
+    Animator playerAnimator;
+
     private void Awake()
     {
         inputActions = GetComponent<PlayerController>().inputActions;
@@ -58,6 +60,8 @@ public class GrapplingHook : MonoBehaviour
         currentNbOfRopes = maxNbOfRopes;
         lineRenderer.positionCount = 0;
         gunTipStartLocalPos = gunTip.transform.localPosition;
+
+        playerAnimator = GetComponent<Animator>();
     }
 
     private void OnEnable()
