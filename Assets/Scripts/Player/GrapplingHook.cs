@@ -30,7 +30,8 @@ public class GrapplingHook : MonoBehaviour
     [SerializeField] bool rapelEnabled = false;
     [SerializeField] float shortenSpeed = 100;
     [SerializeField] float extendSpeed = 200;
-    [SerializeField] float maxRapelDistance = 4;
+    [SerializeField] float minRopeLength = 2;
+    [SerializeField] float maxRopeLength = 11;
     
 
     InputActionAsset inputActions;
@@ -201,7 +202,7 @@ public class GrapplingHook : MonoBehaviour
                 float rapelSpeed = rapelInput == 1? shortenSpeed : extendSpeed;
                 float rapelDistance = Mathf.Abs(Vector3.Distance(gunEnd.position, gunTip.transform.position)) - rapelInput * rapelSpeed * Time.deltaTime;
 
-                if (Mathf.Abs(rapelDistance - initialRopeLength) < maxRapelDistance)
+                if (minRopeLength < rapelDistance && rapelDistance < maxRopeLength)
                 {
                     joint.maxDistance = rapelDistance + jointParameters.maxDistanceModifier;
                     joint.minDistance = rapelDistance + jointParameters.minDistanceModifier;

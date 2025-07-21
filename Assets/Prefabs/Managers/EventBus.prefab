@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3519626190617781356}
-  - component: {fileID: 8758200832064743374}
+  - component: {fileID: 8966016406137186581}
   m_Layer: 0
   m_Name: EventBus
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8758200832064743374
+--- !u!114 &8966016406137186581
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
