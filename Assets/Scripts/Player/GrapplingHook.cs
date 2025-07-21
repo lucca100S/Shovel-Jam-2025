@@ -110,8 +110,8 @@ public class GrapplingHook : MonoBehaviour
             }
             else
             {
-                shootingDuration = maxDistance / shootingSpeed;
-                gunTip.transform.DOMove(gunEnd.position + gunEnd.forward * maxDistance, shootingDuration).OnComplete(() => Invoke("CallRetrieveHook", retrieveDelayTime)).SetEase(Ease.OutCubic);
+                shootingDuration = (maxDistance - 1.5f) / shootingSpeed;
+                gunTip.transform.DOMove(gunEnd.position + gunEnd.forward * (maxDistance - 1.5f), shootingDuration).OnComplete(() => Invoke("CallRetrieveHook", retrieveDelayTime)).SetEase(Ease.OutCubic);
                 Debug.Log("Not hit");
             }
         }

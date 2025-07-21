@@ -337,6 +337,15 @@ public class PlayerController : MonoBehaviour
 
             playerAnimator.SetBool("onWall", onWall);
         }
+
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            state = PlayerStates.OnGround;
+            coyoteTimeCounter = coyoteTime;
+            currentNbOfWallJumps = maxNbOfWallJumps;
+
+            EventBus.Instance.landedOnGround.Invoke();
+        }
     }
     #endregion
 }
