@@ -23,8 +23,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] LayerMask groundLayerMask;
     [SerializeField] LayerMask wallLayerMask;
 
-    [Header("Input Map")]
-    public InputActionAsset inputActions;
     InputAction moveAction;
     InputAction jumpAction;
 
@@ -54,13 +52,17 @@ public class PlayerController : MonoBehaviour
 
     Animator playerAnimator;
 
-    private void OnEnable()
+    private void Start()
     {
-        moveAction = inputActions.FindAction("Move");
-        jumpAction = inputActions.FindAction("Jump");
+        moveAction = GameManager.Instance.inputActions.FindAction("Move");
+        jumpAction = GameManager.Instance.inputActions.FindAction("Jump");
 
         jumpAction.performed += StartJumbBufferCounter;
         jumpAction.canceled += StoppedPressingJump;
+    }
+
+    private void OnEnable()
+    {
         EventBus.Instance.checkOnGround += CheckOnGround;
         EventBus.Instance.hookAttached += ResetGravity;
         EventBus.Instance.hookReleased += IncreaseGravity;
@@ -101,20 +103,23 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        currentVelocity = rb.linearVelocity;
-
-        Move();
-
-        Jump();
-
-        if ((rb.linearVelocity.y < changeJumpGravityThreshold || (!pressingJump && !onWall)) && !increasedGravityApplied)
+        if (!GameManager.Instance.gamePaused)
         {
-            increasedGravityApplied = true;
-            IncreaseGravity();
-        }
+            currentVelocity = rb.linearVelocity;
 
-        playerAnimator.SetFloat("horizontalSpeed", Mathf.Abs(rb.linearVelocity.x));
-        LimitPlayerHorizontalSpeed();
+            Move();
+
+            Jump();
+
+            if ((rb.linearVelocity.y < changeJumpGravityThreshold || (!pressingJump && !onWall)) && !increasedGravityApplied)
+            {
+                increasedGravityApplied = true;
+                IncreaseGravity();
+            }
+
+            playerAnimator.SetFloat("horizontalSpeed", Mathf.Abs(rb.linearVelocity.x));
+            LimitPlayerHorizontalSpeed();
+        }
     }
 
     private void LateUpdate()

@@ -9,18 +9,27 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     GameObject player;
-    InputActionAsset inputAction;
+    public InputActionAsset inputActions;
+    InputAction pauseAction;
     public Vector3 respawnPosition;
 
     public GameObject menuPanel;
     public GameObject finalPanel;
+    public GameObject pausePanel;
     public Animator uiAnimator;
+
+    public GameObject startButton;
+    public GameObject continueButton;
 
     public TMP_Text messageText;
     public float timeBetweenLetters = 0.5f;
     public float timeBetweenSentences = 1;
     Queue<string> messageQueue = new Queue<string>();
     bool typing = false;
+
+    public bool gamePaused = true;
+    float letterTimer = 0;
+    float sentenceTimer = 0;
 
     private void Awake()
     {
@@ -35,13 +44,18 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void OnEnable()
     {
         player = GameObject.Find("Player");
 
-        //player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Disable();
-        //player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
+        pauseAction = inputActions.FindAction("Pause");
+
+        pauseAction.performed += PauseAction;
+    }
+
+    private void OnDisable()
+    {
+        pauseAction.performed -= PauseAction;
     }
 
     private void Update()
@@ -73,30 +87,57 @@ public class GameManager : MonoBehaviour
     #region UI Management
     public void DisableMenuPanel()
     {
+        gamePaused = false;
         menuPanel.gameObject.SetActive(false);
-        player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Enable();
-        player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
     }
 
     public void EnableMenuPanel()
     {
+        gamePaused = true;
+        messageText.SetText("");
+        messageQueue.Clear();
+        StopAllCoroutines();
+        typing = false;
         menuPanel.gameObject.SetActive(true);
-        player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Disable();
-        player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
+
     }
 
     public void EnableFinalPanel()
     {
+        gamePaused = true;
+        messageText.SetText("");
+        messageQueue.Clear();
+        StopAllCoroutines();
+        typing = false;
         finalPanel.gameObject.SetActive(true);
-        player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Disable();
-        player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
     }
 
     public void DisabelFinalPanel()
     {
+        gamePaused = false;
         finalPanel.gameObject.SetActive(false);
-        player.GetComponent<PlayerController>().inputActions.FindActionMap("Player").Enable();
-        player.GetComponent<PlayerController>().inputActions.FindActionMap("UI").Enable();
+    }
+
+    public void PauseAction(InputAction.CallbackContext context)
+    {
+        ManagePause();
+    }
+
+    public void ManagePause()
+    {
+        if (!menuPanel.activeSelf)
+        {
+            if (pausePanel.activeSelf)
+            {
+                gamePaused = false;
+                pausePanel.SetActive(false);
+            }
+            else
+            {
+                gamePaused = true;
+                pausePanel.SetActive(true);
+            }
+        }
     }
 
     public void StartTransition()
@@ -107,6 +148,7 @@ public class GameManager : MonoBehaviour
     public void RestartGame()
     {
         EnableMenuPanel();
+        startButton.GetComponent<Animator>().SetBool("glitch", true);
         respawnPosition = new Vector3(0, 0, 0);
         RespawnPlayer();
     }
@@ -119,8 +161,18 @@ public class GameManager : MonoBehaviour
     public void EndGame()
     {
         EnableFinalPanel();
+        continueButton.GetComponent<Animator>().SetBool("glitch", true);
         respawnPosition = new Vector3(0, 0, 0);
         RespawnPlayer();
+    }
+
+    public void Quit()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false; // Quit in Unity Editor
+#endif
+
+        Application.Quit(); // Quit in build
     }
     #endregion
 
@@ -144,18 +196,30 @@ public class GameManager : MonoBehaviour
         typing = true;
         messageText.SetText("");
 
-        int i = 0;
         foreach (char letter in message)
         {
+            letterTimer = 0;
             string currentText = messageText.text;
             messageText.SetText(currentText + letter);
 
-            yield return new WaitForSecondsRealtime(timeBetweenLetters);
+            yield return new WaitUntil(CanDisplayNextLetter);
         }
 
-        yield return new WaitForSecondsRealtime(timeBetweenSentences);
+        yield return new WaitUntil(() =>
+        {
+            if (!gamePaused)
+                sentenceTimer += Time.deltaTime;
+            return !gamePaused && sentenceTimer > timeBetweenSentences;
+        });
+        sentenceTimer = 0;
         messageText.SetText("");
         typing = false;
+    }
+
+    private bool CanDisplayNextLetter()
+    {
+        letterTimer += Time.deltaTime;
+        return !gamePaused && letterTimer > timeBetweenLetters;
     }
     #endregion
 }

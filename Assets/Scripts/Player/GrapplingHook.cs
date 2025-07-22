@@ -35,7 +35,6 @@ public class GrapplingHook : MonoBehaviour
     [SerializeField] float maxRopeLength = 11;
     
 
-    InputActionAsset inputActions;
     InputAction shootAction;
     InputAction retrieveAction;
     InputAction rapelAction;
@@ -54,7 +53,6 @@ public class GrapplingHook : MonoBehaviour
 
     private void Awake()
     {
-        inputActions = GetComponent<PlayerController>().inputActions;
 
         gunTipRb = gunTip.GetComponent<Rigidbody>();
 
@@ -67,9 +65,9 @@ public class GrapplingHook : MonoBehaviour
 
     private void OnEnable()
     {
-        shootAction = inputActions.FindAction("Shoot");
-        retrieveAction = inputActions.FindAction("Retrieve");
-        rapelAction = inputActions.FindAction("Rapel");
+        shootAction = GameManager.Instance.inputActions.FindAction("Shoot");
+        retrieveAction = GameManager.Instance.inputActions.FindAction("Retrieve");
+        rapelAction = GameManager.Instance.inputActions.FindAction("Rapel");
 
         shootAction.performed += ShootHook;
         retrieveAction.performed += RetrieveHook;
@@ -85,17 +83,21 @@ public class GrapplingHook : MonoBehaviour
 
     private void LateUpdate()
     {
-        LookAtTarget();
+        if (!GameManager.Instance.gamePaused)
+        {
+            LookAtTarget();
 
-        DrawRope();
+            DrawRope();
 
-        Rapel();
+            Rapel();
+
+        }  
     }
 
     #region Shooting
     void ShootHook(InputAction.CallbackContext context)
     {
-        if (grapplingHookEnabled && (state != GrapplingHookStates.Shooting && state != GrapplingHookStates.Attached) && currentNbOfRopes > 0)
+        if (!GameManager.Instance.gamePaused && grapplingHookEnabled && (state != GrapplingHookStates.Shooting && state != GrapplingHookStates.Attached) && currentNbOfRopes > 0)
         {
             float shootingDuration;
             state = GrapplingHookStates.Shooting;
